@@ -16,13 +16,44 @@ function App() {
       .then((data) => setPokemonData(data.pokemon));
   }, []);
 
+  const allTypesHave = (types, pokemon) => {
+    
+    if (pokemon && pokemon.type) {
+      return types
+      .toLowerCase()
+        .split(",")
+        .every((type) =>
+          pokemon.type.map((t) => t.toLowerCase()).includes(type.trim())
+        );
+    }
+    
+    return false;
+  };
+
+  const allWeaknessesHave = (weaknesses, pokemon) => {
+   
+    if (pokemon && pokemon.weaknesses) {
+      return weaknesses
+        .toLowerCase()
+        .split(",")
+        .every((weakness) =>
+          pokemon.weaknesses
+            .map((w) => w.toLowerCase())
+            .includes(weakness.trim())
+        );
+    }
+  
+    return false;
+  };
+
   const filteredPokemon = pokemonData.filter((pokemon) => {
     const nameMatch = pokemon.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const typeMatch = !typeFilter || pokemon.type.includes(typeFilter);
+
+    const typeMatch = !typeFilter || allTypesHave(typeFilter, pokemon);
     const weaknessMatch =
-      !weaknessFilter || pokemon.weaknesses.includes(weaknessFilter);
+      !weaknessFilter || allWeaknessesHave(weaknessFilter, pokemon);
 
     return nameMatch && typeMatch && weaknessMatch;
   });
@@ -37,21 +68,26 @@ function App() {
     normal: "beige",
     electric: "yellow",
     bug: "orange",
+    psychic: "pink"
+
   };
 
   useEffect(() => {
     try {
       if (filteredPokemon.length > 0) {
-        const firstPokeType = filteredPokemon[0].type[0].toLowerCase();
+        const firstPokeType = filteredPokemon[0].type[0]?.toLowerCase();
         const backGColor = typeColorMatch[firstPokeType] || "gray";
 
         setBackgroundColor(backGColor);
+      } else {
+        setBackgroundColor("gray");
       }
     } catch (error) {
       console.error("Error setting background color:", error);
       setBackgroundColor("gray");
     }
   }, [filteredPokemon]);
+
   return (
     <div className="App" style={{ backgroundColor }}>
       <div>
